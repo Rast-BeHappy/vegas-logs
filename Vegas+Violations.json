@@ -19,5 +19,12 @@
         "id": 7,
         "ping": 210,
         "type": "UNOCCUPIED"
+    },
+    {
+        "timestamp": "29.04.2025 16:01:39",
+        "nick": "Malloy_Vegas",
+        "id": 445,
+        "ping": 210,
+        "type": "Test"
     }
 ]
