@@ -28,7 +28,7 @@
     </table>
 
     <script>
-        fetch('Vegas+Violations.json')
+        fetch('https://api.github.com/repos/Rast-BeHappy/vegas-logs/contents/Vegas+Violations.json')
             .then(response => response.json())
             .then(data => {
                 const tbody = document.getElementById('violations');
