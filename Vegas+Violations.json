@@ -1,0 +1,23 @@
+[
+    {
+        "timestamp": "29.04.2025 13:45:12",
+        "nick": "PlayerOne",
+        "id": 12,
+        "ping": 88,
+        "type": "ONFOOT"
+    },
+    {
+        "timestamp": "29.04.2025 13:46:27",
+        "nick": "SpeedRacer",
+        "id": 18,
+        "ping": 120,
+        "type": "INCAR"
+    },
+    {
+        "timestamp": "29.04.2025 13:47:39",
+        "nick": "GhostDriver",
+        "id": 7,
+        "ping": 210,
+        "type": "UNOCCUPIED"
+    }
+]
