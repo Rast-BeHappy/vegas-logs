@@ -88,6 +88,24 @@
             display: none;
         }
 
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .filters {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .filters input {
+            padding: 8px;
+            border-radius: 6px;
+            margin: 5px;
+            border: 1px solid #ccc;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -103,6 +121,10 @@
 
     <div id="content" class="container hidden">
         <h1>Журнал нарушений (Vegas+ Anti-Rvanka)</h1>
+        <div class="filters">
+            <input type="text" id="filterNick" placeholder="Фильтр по игроку" oninput="filterData()">
+            <input type="text" id="filterType" placeholder="Фильтр по типу нарушения" oninput="filterData()">
+        </div>
         <table id="violationsTable">
             <thead>
                 <tr>
@@ -116,6 +138,7 @@
                 <!-- Данные подгрузятся сюда -->
             </tbody>
         </table>
+        <div id="errorMessage" class="error-message hidden">Ошибка загрузки данных. Попробуйте позже.</div>
     </div>
 
     <script>
@@ -136,19 +159,42 @@
             fetch('https://raw.githubusercontent.com/Rast-BeHappy/vegas-logs/main/Vegas%2BViolations.json')
                 .then(response => response.json())
                 .then(data => {
-                    const tableBody = document.querySelector('#violationsTable tbody');
-                    data.forEach(entry => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${entry.nick}</td>
-                            <td>${entry.id}</td>
-                            <td>${entry.type}</td>
-                            <td>${entry.timestamp}</td>
-                        `;
-                        tableBody.appendChild(row);
-                    });
+                    window.violationsData = data;
+                    renderTable(data);
                 })
-                .catch(error => console.error('Ошибка загрузки данных:', error));
+                .catch(error => {
+                    console.error('Ошибка загрузки данных:', error);
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                });
+        }
+
+        function renderTable(data) {
+            const tableBody = document.querySelector('#violationsTable tbody');
+            tableBody.innerHTML = ''; // Очистить таблицу перед рендерингом
+            data.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.nick}</td>
+                    <td>${entry.id}</td>
+                    <td>${entry.type}</td>
+                    <td>${entry.timestamp}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function filterData() {
+            const filterNick = document.getElementById('filterNick').value.toLowerCase();
+            const filterType = document.getElementById('filterType').value.toLowerCase();
+
+            const filteredData = window.violationsData.filter(entry => {
+                return (
+                    entry.nick.toLowerCase().includes(filterNick) &&
+                    entry.type.toLowerCase().includes(filterType)
+                );
+            });
+
+            renderTable(filteredData);
         }
     </script>
 </body>
