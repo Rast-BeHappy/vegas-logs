@@ -143,25 +143,6 @@
             display: none;
             animation: fadeIn 0.5s ease;
         }
-
-        .new-violation {
-            background-color: #ffcc00; /* Подсветка новых нарушений */
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                width: 90%;
-                margin: 20px auto;
-            }
-
-            table {
-                font-size: 14px;
-            }
-
-            .filters input {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -176,7 +157,6 @@
         <div class="filters">
             <input type="text" id="filterNick" placeholder="Фильтр по игроку" oninput="filterData()">
             <input type="text" id="filterType" placeholder="Фильтр по типу нарушения" oninput="filterData()">
-            <input type="text" id="searchId" placeholder="Поиск по ID" oninput="searchById()">
         </div>
         <div id="errorMessage" class="error-message hidden">Ошибка загрузки данных. Попробуйте позже.</div>
         <table id="violationsTable">
@@ -222,7 +202,6 @@
                     renderTable(data);
                     renderPagination(data);
                     showToast('Данные успешно загружены!');
-                    setInterval(loadViolations, 60000); // Автоматическое обновление данных каждую минуту
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки данных:', error);
@@ -235,11 +214,7 @@
             tableBody.innerHTML = '';
 
             data.forEach(entry => {
-                const violationTime = new Date(entry.timestamp).getTime();
-                const isNew = Date.now() - violationTime < 60000; // 1 минута для новых нарушений
-
                 const row = document.createElement('tr');
-                row.classList.add(isNew ? 'new-violation' : ''); // Подсветка новых нарушений
                 row.innerHTML = `
                     <td>${entry.nick}</td>
                     <td>${entry.id}</td>
@@ -289,13 +264,6 @@
                 );
             });
 
-            renderTable(filteredData);
-            renderPagination(filteredData);
-        }
-
-        function searchById() {
-            const searchId = document.getElementById('searchId').value;
-            const filteredData = violationsData.filter(entry => entry.id.includes(searchId));
             renderTable(filteredData);
             renderPagination(filteredData);
         }
