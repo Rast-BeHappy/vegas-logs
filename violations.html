@@ -1,53 +1,43 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Нарушения Vegas+</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f8f8f8; padding: 20px; }
-        h1 { color: #d00077; }
-        table { width: 100%; border-collapse: collapse; background: white; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background: #eee; }
-        tr:hover { background: #f0f0f0; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vegas+ Violations</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Нарушения Vegas+</h1>
-    <table>
+    <h1>Violations Log</h1>
+    <table id="violationsTable">
         <thead>
             <tr>
-                <th>Время</th>
-                <th>Ник</th>
+                <th>Player</th>
                 <th>ID</th>
-                <th>Пинг</th>
-                <th>Тип</th>
+                <th>Violation Type</th>
+                <th>Timestamp</th>
             </tr>
         </thead>
-        <tbody id="violations"></tbody>
+        <tbody>
+            <!-- Данные из JSON будут вставлены сюда -->
+        </tbody>
     </table>
 
     <script>
-        fetch('https://api.github.com/repos/Rast-BeHappy/vegas-logs/contents/Vegas+Violations.json')
+        // Функция для загрузки данных с GitHub
+        fetch('https://raw.githubusercontent.com/Rast-BeHappy/vegas-logs/main/Vegas%2BViolations.json')
             .then(response => response.json())
             .then(data => {
-                const tbody = document.getElementById('violations');
-                data.reverse().forEach(entry => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${entry.timestamp}</td>
-                        <td>${entry.nick}</td>
-                        <td>${entry.id}</td>
-                        <td>${entry.ping}</td>
-                        <td>${entry.type}</td>
-                    `;
-                    tbody.appendChild(row);
+                // Заполнение таблицы данными
+                const table = document.getElementById('violationsTable').getElementsByTagName('tbody')[0];
+                data.forEach(violation => {
+                    const row = table.insertRow();
+                    row.insertCell(0).textContent = violation.playerName;
+                    row.insertCell(1).textContent = violation.playerId;
+                    row.insertCell(2).textContent = violation.violationType;
+                    row.insertCell(3).textContent = violation.timestamp;
                 });
             })
-            .catch(error => {
-                document.body.innerHTML += "<p style='color:red;'>Ошибка загрузки логов!</p>";
-                console.error(error);
-            });
+            .catch(error => console.error('Ошибка загрузки данных:', error));
     </script>
 </body>
 </html>
