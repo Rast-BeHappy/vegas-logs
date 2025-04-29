@@ -50,6 +50,7 @@
             background: #3d3d3d;
             color: #ff0077;
             font-weight: bold;
+            cursor: pointer;
         }
 
         tr:hover {
@@ -106,9 +107,41 @@
             border: 1px solid #ccc;
         }
 
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            background-color: #ff0077;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .pagination button:hover {
+            background-color: #e6006b;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            display: none;
+            animation: fadeIn 0.5s ease;
         }
     </style>
 </head>
@@ -125,24 +158,30 @@
             <input type="text" id="filterNick" placeholder="Фильтр по игроку" oninput="filterData()">
             <input type="text" id="filterType" placeholder="Фильтр по типу нарушения" oninput="filterData()">
         </div>
+        <div id="errorMessage" class="error-message hidden">Ошибка загрузки данных. Попробуйте позже.</div>
         <table id="violationsTable">
             <thead>
                 <tr>
-                    <th>Игрок</th>
-                    <th>ID</th>
-                    <th>Тип нарушения</th>
-                    <th>Время</th>
+                    <th onclick="sortTable(0)">Игрок</th>
+                    <th onclick="sortTable(1)">ID</th>
+                    <th onclick="sortTable(2)">Тип нарушения</th>
+                    <th onclick="sortTable(3)">Время</th>
                 </tr>
             </thead>
             <tbody>
                 <!-- Данные подгрузятся сюда -->
             </tbody>
         </table>
-        <div id="errorMessage" class="error-message hidden">Ошибка загрузки данных. Попробуйте позже.</div>
+        <div id="pagination" class="pagination"></div>
     </div>
+
+    <div id="toast" class="toast">Данные обновлены</div>
 
     <script>
         const PASSWORD = "admin123"; // Замени на свой пароль
+        let currentPage = 1;
+        let rowsPerPage = 10;
+        let violationsData = [];
 
         function authorize() {
             const input = document.getElementById("adminPass").value;
@@ -159,8 +198,11 @@
             fetch('https://raw.githubusercontent.com/Rast-BeHappy/vegas-logs/main/Vegas%2BViolations.json')
                 .then(response => response.json())
                 .then(data => {
-                    window.violationsData = data;
+                    violationsData = data;
                     renderTable(data);
+                    renderPagination(data);
+                    showToast('Данные успешно загружены!');
+                    setInterval(loadViolations, 60000); // Автоматическое обновление данных каждую минуту
                 })
                 .catch(error => {
                     console.error('Ошибка загрузки данных:', error);
@@ -170,8 +212,8 @@
 
         function renderTable(data) {
             const tableBody = document.querySelector('#violationsTable tbody');
-            tableBody.innerHTML = ''; // Очистить таблицу перед рендерингом
-            data.forEach(entry => {
+            tableBody.innerHTML = '';
+            data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).forEach(entry => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${entry.nick}</td>
@@ -183,11 +225,39 @@
             });
         }
 
+        function renderPagination(data) {
+            const pageCount = Math.ceil(data.length / rowsPerPage);
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            for (let i = 1; i <= pageCount; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.onclick = () => {
+                    currentPage = i;
+                    renderTable(data);
+                };
+                pagination.appendChild(pageButton);
+            }
+        }
+
+        function sortTable(columnIndex) {
+            const rows = [...document.querySelectorAll('#violationsTable tbody tr')];
+            const sortedRows = rows.sort((a, b) => {
+                const aText = a.children[columnIndex].textContent;
+                const bText = b.children[columnIndex].textContent;
+                return aText.localeCompare(bText);
+            });
+
+            const tableBody = document.querySelector('#violationsTable tbody');
+            tableBody.innerHTML = '';
+            sortedRows.forEach(row => tableBody.appendChild(row));
+        }
+
         function filterData() {
             const filterNick = document.getElementById('filterNick').value.toLowerCase();
             const filterType = document.getElementById('filterType').value.toLowerCase();
 
-            const filteredData = window.violationsData.filter(entry => {
+            const filteredData = violationsData.filter(entry => {
                 return (
                     entry.nick.toLowerCase().includes(filterNick) &&
                     entry.type.toLowerCase().includes(filterType)
@@ -195,6 +265,16 @@
             });
 
             renderTable(filteredData);
+            renderPagination(filteredData);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000); // Toast исчезает через 3 секунды
         }
     </script>
 </body>
