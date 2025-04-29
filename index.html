@@ -5,40 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vegas+ Нарушения</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #f0f0f0;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #1e1e1e;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #444;
+            text-align: center;
+        }
+        th {
+            background-color: #222;
+        }
+        .hidden {
+            display: none;
+        }
+        .login {
+            margin-top: 50px;
+            text-align: center;
+        }
+        input[type="password"] {
+            padding: 8px;
+            width: 200px;
+            font-size: 16px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Лог срабатываний защиты Vegas+</h1>
-    <table id="violationsTable">
-        <thead>
-            <tr>
-                <th>Игрок</th>
-                <th>ID</th>
-                <th>Тип нарушения</th>
-                <th>Время</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Данные будут загружены сюда -->
-        </tbody>
-    </table>
+    <div id="auth" class="login">
+        <h2>Введите пароль администратора</h2>
+        <input type="password" id="adminPass" placeholder="Пароль">
+        <button onclick="authorize()">Войти</button>
+    </div>
+
+    <div id="content" class="hidden">
+        <h1>Лог срабатываний защиты Vegas+</h1>
+        <table id="violationsTable">
+            <thead>
+                <tr>
+                    <th>Игрок</th>
+                    <th>ID</th>
+                    <th>Тип нарушения</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Данные вставятся сюда -->
+            </tbody>
+        </table>
+    </div>
 
     <script>
-        fetch('https://raw.githubusercontent.com/Rast-BeHappy/vegas-logs/main/Vegas%2BViolations.json')
-            .then(response => response.json())
-            .then(data => {
-                const tableBody = document.querySelector('#violationsTable tbody');
-                data.forEach(entry => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${entry.nick}</td>
-                        <td>${entry.id}</td>
-                        <td>${entry.type}</td>
-                        <td>${entry.timestamp}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            })
-            .catch(error => console.error('Ошибка загрузки данных:', error));
+        const PASSWORD = "admin123"; // Замени на свой пароль
+
+        function authorize() {
+            const input = document.getElementById("adminPass").value;
+            if (input === PASSWORD) {
+                document.getElementById("auth").classList.add("hidden");
+                document.getElementById("content").classList.remove("hidden");
+                loadViolations();
+            } else {
+                alert("Неверный пароль!");
+            }
+        }
+
+        function loadViolations() {
+            fetch('https://raw.githubusercontent.com/Rast-BeHappy/vegas-logs/main/Vegas%2BViolations.json')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#violationsTable tbody');
+                    data.forEach(entry => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${entry.nick}</td>
+                            <td>${entry.id}</td>
+                            <td>${entry.type}</td>
+                            <td>${entry.timestamp}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Ошибка загрузки данных:', error));
+        }
     </script>
 </body>
 </html>
